@@ -85,16 +85,18 @@ if st.session_state.df is not None:
 
     st.markdown("### 🔍 Filter Your Data")
 
-    # Identify categorical columns (low-cardinality only)
+    # Identify low-cardinality categorical columns
     cat_cols = df.select_dtypes(include=["object", "category"]).columns.tolist()
     filterable_cols = [col for col in cat_cols if df[col].nunique() < 50]
 
     # Layout filters in two columns
     col1, col2 = st.columns(2)
+
     for i, col in enumerate(filterable_cols):
-        with col1 if i % 2 == 0 else col2:
-            options = sorted(df[col].dropna().unique().tolist())
-            selected = st.multiselect(f"{col}:", options, default=options, key=col)
+        col_target = col1 if i % 2 == 0 else col2
+        with col_target:
+            available_options = sorted(df[col].dropna().unique())
+            selected = st.multiselect(f"{col}:", available_options, key=col)
             if selected:
                 df = df[df[col].isin(selected)]
 
