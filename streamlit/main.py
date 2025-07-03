@@ -8,35 +8,49 @@ from io import StringIO, BytesIO
 # --- Page Config ---
 st.set_page_config(page_title="Obsidian", layout="wide")
 
-# --- Inject Custom CSS ---
+# --- Inject Custom CSS for Obsidian Palette ---
 st.markdown("""
 <style>
     .main {
         background-color: #0e0e0e;
-        color: #fafafa;
+        color: #e0e0e0;
+        font-family: 'Inter', sans-serif;
     }
     h1, h2, h3 {
-        color: #F63366;
+        color: #00bfc2;
+        letter-spacing: 0.5px;
+        font-weight: 600;
     }
-    div[data-baseweb="select"] > div {
-        background-color: #1e1e1e;
-        border-radius: 0.5rem;
-        border: 1px solid #444;
-        padding: 0.25rem;
-        color: #fafafa;
+    div[data-baseweb="select"] > div, .stMultiSelect > div {
+        background-color: #1a1a1a !important;
+        border: 1px solid #2a2a2a !important;
+        border-radius: 6px !important;
+        color: #e0e0e0 !important;
+        padding: 6px 8px !important;
+        max-width: 100%;
     }
-    .stSlider > div {
-        padding: 0rem 1rem;
+    .stMultiSelect div[data-baseweb="tag"] {
+        background-color: #00bfc2 !important;
+        color: #0e0e0e !important;
+        font-weight: 500;
+        border-radius: 4px;
     }
-    .stMarkdown {
-        padding-bottom: 1rem;
+    [data-testid="stSlider"] > div {
+        background: #333 !important;
+    }
+    [data-testid="stSlider"] .stSlider > div[role="slider"] {
+        background: #00bfc2 !important;
+    }
+    .stDataFrame {
+        background-color: #111 !important;
+        border: 1px solid #333 !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
 # --- Interface Header ---
 st.title("Obsidian")
-st.markdown("_A dynamic ETL interface for importing, exploring, and preparing structured data files._")
+st.markdown("_From raw input to structured insight—Obsidian filters, shapes, and readies your data for what comes next._")
 st.markdown("Supported formats: `.csv`, `.xlsx`, `.json`")
 
 # --- Input URL ---
@@ -84,6 +98,7 @@ if st.session_state.df is not None:
     df = st.session_state.df.copy()
 
     st.markdown("### 🔍 Filter Your Data")
+    st.caption("**Note:** If no values are selected in a filter, all values will be included by default.")
 
     # Identify low-cardinality categorical columns
     cat_cols = df.select_dtypes(include=["object", "category"]).columns.tolist()
