@@ -8,6 +8,32 @@ from io import StringIO, BytesIO
 # --- Page Config ---
 st.set_page_config(page_title="Obsidian", layout="wide")
 
+# --- Inject Custom CSS ---
+st.markdown("""
+<style>
+    .main {
+        background-color: #0e0e0e;
+        color: #fafafa;
+    }
+    h1, h2, h3 {
+        color: #F63366;
+    }
+    div[data-baseweb="select"] > div {
+        background-color: #1e1e1e;
+        border-radius: 0.5rem;
+        border: 1px solid #444;
+        padding: 0.25rem;
+        color: #fafafa;
+    }
+    .stSlider > div {
+        padding: 0rem 1rem;
+    }
+    .stMarkdown {
+        padding-bottom: 1rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # --- Interface Header ---
 st.title("Obsidian")
 st.markdown("_A dynamic ETL interface for importing, exploring, and preparing structured data files._")
@@ -63,17 +89,20 @@ if st.session_state.df is not None:
     cat_cols = df.select_dtypes(include=["object", "category"]).columns.tolist()
     filterable_cols = [col for col in cat_cols if df[col].nunique() < 50]
 
-    # Apply filters
-    for col in filterable_cols:
-        options = ["All"] + sorted(df[col].dropna().unique().tolist())
-        selected = st.selectbox(f"Filter by {col}:", options, key=col)
-        if selected != "All":
-            df = df[df[col] == selected]
+    # Layout filters in two columns
+    col1, col2 = st.columns(2)
+    for i, col in enumerate(filterable_cols):
+        with col1 if i % 2 == 0 else col2:
+            options = sorted(df[col].dropna().unique().tolist())
+            selected = st.multiselect(f"{col}:", options, default=options, key=col)
+            if selected:
+                df = df[df[col].isin(selected)]
 
     # Row limiter
+    st.markdown("### 📏 Limit Display")
     row_limit = st.slider("Rows to display", 5, 100, 10)
 
-    # Display filtered results (all columns)
-    st.dataframe(df.head(row_limit))
+    # Display filtered results
+    st.dataframe(df.head(row_limit), use_container_width=True)
 
-    st.markdown("ℹ️ Numerical data (e.g. time series) is shown untouched and ready for analysis.")
+    st.markdown("ℹ️ Numerical and time-series data remains intact, ready for transformation or export.")
